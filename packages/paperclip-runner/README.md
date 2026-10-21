@@ -906,6 +906,6 @@ Focused regression checks:
 
 ```sh
 cd packages/paperclip-runner
-pnpm exec vitest run src/cli/acpx-runtime-sidecar.test.ts src/drivers/runner-tool-bridge.test.ts
-cargo test --manifest-path runner/Cargo.toml --locked -p paperclip-runner-core --test acpx_streaming_burst --test acpx_provider_resolutions --test acpx_event_projection
+pnpm exec vitest run src/cli/acpx-runtime-sidecar.test.ts src/drivers/runner-tool-bridge.test.ts src/drivers/acpx/copilot-installation.test.ts src/drivers/acpx/profile-compatibility.test.ts
+cargo test --manifest-path runner/Cargo.toml --locked -p paperclip-runner-core --lib --test acpx_streaming_burst --test acpx_provider_resolutions --test acpx_event_projection
 ```

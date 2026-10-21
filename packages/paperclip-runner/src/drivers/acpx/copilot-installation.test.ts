@@ -30,6 +30,7 @@ const SEMANTIC_RECEIPT_SOURCES = [
   ["../runner-tool-bridge.ts", "semanticBridgeSourceSha256"],
   ["copilot-tool-evidence.ts", "toolEvidenceSourceSha256"],
   ["../../cli/acpx-runtime-sidecar.ts", "semanticSidecarSourceSha256"],
+  ["../../cli/acpx-expired-tools.ts", "semanticExpiredToolsSourceSha256"],
   ["sidecar-protocol.ts", "semanticSidecarProtocolSourceSha256"],
   ["codex-acpx-driver.ts", "semanticDirectDriverSourceSha256"],
   ["../completion-continuation.ts", "semanticContinuationSourceSha256"],
@@ -87,9 +88,20 @@ vi.mock("./installation-integrity.js", () => ({ verifyNativeAcpxInstallation: vi
 
 describe("Copilot build-owned installation", () => {
   it("admits the current profile with environment launch preparation", () => {
-    expect(QUALIFIED_ACPX_PROFILES.copilot.agentProfileVersion).toBe(52);
+    expect(QUALIFIED_ACPX_PROFILES.copilot.agentProfileVersion).toBe(53);
     expect(QUALIFIED_ACPX_PROFILES.copilot.qualificationStatus).toBeUndefined();
-    expect(QUALIFIED_ACPX_PROFILES.copilot.commandDigest).toBe("sha256:3614db52d3ddcbc0153c79361a0db2c4324249475d3be490f152b64f916bdd53");
+    expect(QUALIFIED_ACPX_PROFILES.copilot.commandDigest).toBe("sha256:ddb2f3b511f8b5bb0e83ae3952267c741bd86fb0c59efc382dea4806cc7eba58");
+  });
+
+  it("preserves v52 while binding late tool receipt handling", () => {
+    const prior = JSON.parse(readFileSync(new URL("../../../test/fixtures/copilot-profile-v52-identity.json", import.meta.url), "utf8"));
+    const current = JSON.parse(readFileSync(new URL("../../../test/fixtures/copilot-profile-v53-identity.json", import.meta.url), "utf8"));
+    expect(prior.commandDigest).toBe("sha256:3614db52d3ddcbc0153c79361a0db2c4324249475d3be490f152b64f916bdd53");
+    expect(Object.keys(prior.declaration).filter(key => current.declaration[key] !== prior.declaration[key]).sort()).toEqual([
+      "agentProfileVersion", "profileCompatibilitySourceSha256", "semanticSidecarSourceSha256",
+    ]);
+    expect(Object.keys(current.declaration).filter(key => !Object.hasOwn(prior.declaration, key))).toEqual(["semanticExpiredToolsSourceSha256"]);
+    expect(isSupportedAcpxProfileVersion("copilot", 52)).toBe(true);
   });
 
   it("preserves v51 when the setup transport contract changes", () => {

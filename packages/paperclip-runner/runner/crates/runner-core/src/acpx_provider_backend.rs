@@ -2692,6 +2692,84 @@ mod tests {
     }
 
     #[test]
+    fn streaming_merge_respects_utf8_byte_limit_and_metadata_boundaries() {
+        let operations = Vec::new();
+        let empty = AcpxDurableState::new(
+            serde_json::from_value(descriptor("codex")).unwrap(),
+            AuthorizedToolSet {
+                schema: TOOL_SET_SCHEMA.into(),
+                schema_version: 1,
+                catalog_digest: authorized_tool_catalog_digest(&operations).unwrap(),
+                operations,
+            },
+            "test".into(),
+        );
+        for (name, left, right, changed, merged) in [
+            ("ASCII at limit", "a".repeat(3_999), "b", None, true),
+            ("ASCII above limit", "a".repeat(4_000), "b", None, false),
+            ("UTF-8 at limit", "片".repeat(1_333), "a", None, true),
+            ("UTF-8 above limit", "片".repeat(1_333), "片", None, false),
+            (
+                "item identity",
+                "first".into(),
+                "second",
+                Some(("itemId", "message-2")),
+                false,
+            ),
+            (
+                "item kind",
+                "first".into(),
+                "second",
+                Some(("kind", "agentMessage")),
+                false,
+            ),
+            (
+                "output channel",
+                "first".into(),
+                "second",
+                Some(("channel", "final")),
+                false,
+            ),
+        ] {
+            let mut state = empty.clone();
+            let first =
+                json!({"itemId":"message-1","kind":"reasoning","channel":"summary","text":left});
+            let mut second = first.clone();
+            second["text"] = json!(right);
+            if let Some((field, value)) = changed {
+                second[field] = json!(value);
+            }
+            for payload in [&first, &second] {
+                state
+                    .push_streaming(NormalizedProviderEvent {
+                        event_type: "item.delta".into(),
+                        priority: EventPriority::P2,
+                        payload: payload.clone(),
+                    })
+                    .unwrap();
+            }
+            if merged {
+                let mut expected = first.clone();
+                expected["text"] = json!(format!("{left}{right}"));
+                assert_eq!(state.pending_events.len(), 1, "{name}");
+                assert_eq!(state.pending_events[0].payload, expected, "{name}");
+                assert_eq!(
+                    state.pending_events[0].payload["text"]
+                        .as_str()
+                        .unwrap()
+                        .len(),
+                    4_000,
+                    "{name}"
+                );
+            } else {
+                assert_eq!(state.pending_events.len(), 2, "{name}");
+                assert_eq!(state.pending_events[0].payload, first, "{name}");
+                assert_eq!(state.pending_events[1].payload, second, "{name}");
+            }
+        }
+    }
+
+    #[test]
     fn durable_runtime_ledger_retains_only_unsettled_requests_and_rejects_forged_types() {
         let operations = Vec::new();
         let tool_set = AuthorizedToolSet {
