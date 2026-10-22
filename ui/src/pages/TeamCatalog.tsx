@@ -204,12 +204,12 @@ function titleCase(slug: string): string {
 }
 
 function encodeTeamFilePath(filePath: string): string {
-  return filePath.split("/").map(encodeURIComponent).join("%7E");
+  return btoa(encodeURIComponent(filePath)).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
 }
 
 function decodeTeamFilePath(encoded: string | undefined): string | null {
   if (!encoded) return null;
-  return encoded.split(/%7E|~/i).map(decodeURIComponent).join("/");
+  return decodeURIComponent(atob(encoded.replaceAll("-", "+").replaceAll("_", "/")));
 }
 
 type ParsedRoute = { catalogRef: string | null; filePath: string | null };
