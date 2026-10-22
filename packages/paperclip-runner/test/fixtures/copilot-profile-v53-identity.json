@@ -1,5 +1,5 @@
 {
-  "commandDigest": "sha256:ddb2f3b511f8b5bb0e83ae3952267c741bd86fb0c59efc382dea4806cc7eba58",
+  "commandDigest": "sha256:6441ff7f3fc664064bff9e7ae80252ddec7a39236f9a4b9d402785eb8b03b2c9",
   "declaration": {
     "schema": "paperclip.acpx_profile_declaration.v1",
     "agent": "copilot",
@@ -29,7 +29,7 @@
     "semanticBridgeSourceSha256": "89e3dde25ff35bfd4d7f520fd9d14af3cb9027f182a2d51431d298f1015be580",
     "toolEvidenceSourceSha256": "6eef5039afc75bb851eaf9cd82a6f099e4bd398ca2deb59dd66f5b2a81a7a706",
     "semanticNormalizedInputContract": "validated-forwarded-input-commit-v1",
-    "semanticSidecarSourceSha256": "fc903cea607f56041be15af457c17d0ce40cb43b979e297da0dfaea9a2c25139",
+    "semanticSidecarSourceSha256": "cc90b59bdfe6a82f7fa3e819e8671f71f7b14047e68942e8086618ffbaacf59f",
     "semanticDirectDriverSourceSha256": "ff572638f2cb5d9f8249ff8e2f412311c1e3af209ef0bf7e5ea9f10a21d91103",
     "semanticValidationSourceSha256": "02fbb92681c78c5de5d2f1aae25aabc25a0e5df6b0ff4baccac652192a8da975",
     "semanticNormalizationSourceSha256": "8b628b82e8eacc91cdcc6fdca2210ba4cf282f01e9c6f74e95ff271655b5047e",
@@ -73,8 +73,7 @@
     "profileSourceSha256": "f5538b3dbefa7634a332b87d5ededcefb56aa7e5790cede1c7a0d948a548a456",
     "metadataProbeSourceSha256": "be4c8416edd27061109bc1f33d0c26071b4facbb3f651beaae6b3c0275cce727",
     "permissionToolIdentitySourceSha256": "770b47305e571a81f344883057d0e4a482a1cd59ac77d045836593a8e739deb1",
-    "semanticExpiredToolsSourceSha256": "8cfd24b9d5d3025bf4bedeb2b0ccdcc5619582af47c5ce51bd987aa0db608b49",
-    "semanticContinuationSourceSha256": "eb877719ef32a935afa4ec93f0f1c43d58d55bc4e1042965febcac4c45ed851c",
+    "semanticContinuationSourceSha256": "1154778050a39178b09e9fe835173592691f6b679348814f30eaae509d84db0e",
     "runtimeHostSourceSha256": "60e5454f030e87f2afa8b1fb120b26adb126b6b17d0e5e82f49c77f76f466cbb",
     "runtimeAdapterSourceSha256": "e4c764c2c3c7dd655a965b39472bd1ad8d577d1e7258b25594b171c9429752b8",
     "runtimeSandboxSourceSha256": "92dfa53f5a3ed0062913ae417eeccec243b430d444495efde2a8e9c4c02e78ea",
