@@ -363,6 +363,7 @@ import {
   resolveNativeBilling,
   parseRemoteRunnerProcessIdentity,
   REMOTE_RUNNER_CHILD_LAUNCH_SCRIPT,
+  REMOTE_RUNNER_LAUNCH_SCRIPT,
   verifyRemoteRunnerReattachment,
   readRemoteProviderPackManifest,
   readBundledRemoteProviderPackManifest,
@@ -770,6 +771,31 @@ describe("remote controller restart adoption", () => {
 
 
 describe("remote runner launch fingerprint compatibility", () => {
+  it.each(["missing", "broken", "available"])("checks remote Node before detaching a Runner (Node=%s)", async nodeState => {
+    const root = await mkdtemp(join(tmpdir(), "remote-launch-node-"));
+    const bin = join(root, "bin");
+    const dispatched = join(root, "dispatched");
+    const marker = join(root, "state", "identity");
+    try {
+      await mkdir(bin);
+      for (const name of ["dirname", "mkdir"]) await symlink(execFileSync("sh", ["-c", `command -v ${name}`], { encoding: "utf8" }).trim(), join(bin, name));
+      // Record the detach boundary without starting an unmanaged child.
+      await writeFile(join(bin, "nohup"), '#!/bin/sh\nprintf dispatched > "$DISPATCH_RECEIPT"\n', { mode: 0o755 });
+      if (nodeState === "available") await symlink(process.execPath, join(bin, "node"));
+      if (nodeState === "broken") await writeFile(join(bin, "node"), "#!/bin/sh\nexit 1\n", { mode: 0o755 });
+      const result = spawnSync("/bin/sh", ["-c", REMOTE_RUNNER_LAUNCH_SCRIPT + "; wait", "launch", marker, "nonce", "runner", "exit 0"], {
+        env: { ...process.env, PATH: bin, DISPATCH_RECEIPT: dispatched }, encoding: "utf8", timeout: 3_000,
+      });
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(nodeState === "available" ? 0 : nodeState === "missing" ? 127 : 1);
+      if (nodeState === "available") expect(await readFile(dispatched, "utf8")).toBe("dispatched");
+      else {
+        await expect(access(dispatched)).rejects.toMatchObject({ code: "ENOENT" });
+        await expect(access(dirname(marker))).rejects.toMatchObject({ code: "ENOENT" });
+      }
+    } finally { await rm(root, { recursive: true, force: true }); }
+  });
+
   it.each([true, false])("launches with the guaranteed Node runtime when boot identity is available: %s", async (hasBootIdentity) => {
     const root = await mkdtemp(join(tmpdir(), "remote-launch-generation-"));
     try {
